@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import Stats from 'three/examples/jsm/libs/stats.module';
+//import Stats from 'three/examples/jsm/libs/stats.module';
 
 export default class SceneInit {
   constructor(canvasId) {
@@ -18,7 +18,7 @@ export default class SceneInit {
 
     // NOTE: Additional components.
     this.clock = undefined;
-    this.stats = undefined;
+    //this.stats = undefined;
     this.controls = undefined;
 
     // NOTE: Lighting is basically required.
@@ -34,10 +34,8 @@ export default class SceneInit {
       1,
       1000
     );
-    this.camera.position.set(50, 50, 100);
+    this.camera.position.set(0, 4, 10);
     this.camera.lookAt(0, 0, 0);
-
-    this.mouse = new THREE.Vector2();
 
     //this.camera.aspect = width / height;
     //this.camera.updateProjectMatrix();
@@ -45,11 +43,13 @@ export default class SceneInit {
     // NOTE: Specify a canvas which is already created in the HTML.
     const canvas = document.getElementById(this.canvasId);
     this.renderer = new THREE.WebGLRenderer({
+      alpha: true,
       canvas,
       // NOTE: Anti-aliasing smooths out the edges.
-      antialias: true,
+      //antialias: true,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setClearColor(0x000000, 0);
     // this.renderer.shadowMap.enabled = true;
     document.body.appendChild(this.renderer.domElement);
 
@@ -59,46 +59,40 @@ export default class SceneInit {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
-    //dolly around a.k.a zoom in and out
-    //this.controls.maxDistance= 10;
-
-    //dolly around a.k.a zoom in and out
-    //this.controls.minDistance= -10;
-
-    // to disable zoom
-    // this.controls.enableZoom = true;
-
-    // // to disable rotation
-    //this.controls.enableRotate = false;
-
-    // //speed up the rotation
-    // this.controls.rotationSpeed = 5;
-
-    // // to disable pan
-    // this.controls.enablePan = false;
+    this.controls.minPolarAngle = Math.PI / 2;
+    this.controls.maxPolarAngle = Math.PI / 2;
 
     //inertia in object
+    this.controls.minDistance = 100;
+    this.controls.maxDistance = 240;
+    this.controls.enablePan = true;
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.2;
+    this.controls.dampingFactor = 0.5;
+    this.controls.enableRotate = true;
+    this.controls.rotateSpeed = 0.6;
+
+    //this.controls.maxDistance = 9;
+    this.controls.target.set(0, 0.5, 0);
+    this.controls.update();
 
     // //auto rotate
-    // this.controls.autoRotate = true;
+    //this.controls.autoRotate = true;
 
     //mouse controls
-    this.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+    //this.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
 
-    this.stats = Stats();
-    document.body.appendChild(this.stats.dom);
+    // this.stats = Stats();
+    // document.body.appendChild(this.stats.dom);
 
     // ambient light which is for the whole scene
     this.ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-    this.ambientLight.castShadow = true;
+    //this.ambientLight.castShadow = true;
     this.scene.add(this.ambientLight);
 
     // directional light - parallel sun rays
-    this.directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     //this.directionalLight.castShadow = true;
-    this.directionalLight.position.set(0, 30, 64);
+    this.directionalLight.position.set(30, 30, 64);
     this.scene.add(this.directionalLight);
 
     // if window resizes
@@ -106,8 +100,9 @@ export default class SceneInit {
 
     // NOTE: Load space background.
     this.loader = new THREE.TextureLoader();
-    this.scene.background = this.loader.load('./pics/space.jpeg');
-
+    //this.scene.background = this.loader.load('./pics/space.jpeg');
+    //this.scene.background = new THREE.Color(0xffffff);
+    //this.scene.fog = new THREE.Fog( 0xa0a0a0, 10, 500 );
     // NOTE: Declare uniforms to pass into glsl shaders.
     // this.uniforms = {
     //   u_time: { type: 'f', value: 1.0 },
@@ -121,8 +116,6 @@ export default class SceneInit {
     // requestAnimationFrame(this.animate.bind(this));
     window.requestAnimationFrame(this.animate.bind(this));
     this.render();
-    //this.stats.update();
-    //this.controls.update();
   }
 
   render() {
