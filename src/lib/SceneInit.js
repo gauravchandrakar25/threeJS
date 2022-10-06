@@ -11,8 +11,8 @@ export default class SceneInit {
 
     // NOTE: Camera params;
     // this.aspect=  5.9;
-    this.fov = 70;
-    this.nearPlane = 1;
+    this.fov = 50;
+    this.nearPlane = 0.01;
     this.farPlane = 1000;
     this.canvasId = canvasId;
 
@@ -22,8 +22,10 @@ export default class SceneInit {
     this.controls = undefined;
 
     // NOTE: Lighting is basically required.
+    //this.hemilight = undefined;
     this.ambientLight = undefined;
     this.directionalLight = undefined;
+    this.directionalLight2 = undefined;
   }
 
   initialize() {
@@ -34,8 +36,9 @@ export default class SceneInit {
       1,
       1000
     );
-    this.camera.position.set(0, 4, 10);
-    this.camera.lookAt(0, 0, 0);
+
+    this.camera.position.set(0, 0, 50);
+    this.camera.lookAt(10, 10, 10);
 
     //this.camera.aspect = width / height;
     //this.camera.updateProjectMatrix();
@@ -46,17 +49,29 @@ export default class SceneInit {
       alpha: true,
       canvas,
       // NOTE: Anti-aliasing smooths out the edges.
-      //antialias: true,
+      antialias: true,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setClearColor(0x000000, 0);
-    // this.renderer.shadowMap.enabled = true;
+    this.renderer.setClearColor(0xffffff, 0);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.enabled = true;
     document.body.appendChild(this.renderer.domElement);
+
+    //more sharp rendering
+    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    this.pmremGenerator.compileEquirectangularShader();
+
+    // const doc = document.querySelector('.main');
+    // doc.appendChild(renderer.domElement);
 
     //this.drag_controls = new THREE.PointDragControls();
 
     this.clock = new THREE.Clock();
-
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.controls.minPolarAngle = Math.PI / 2;
@@ -85,15 +100,37 @@ export default class SceneInit {
     // document.body.appendChild(this.stats.dom);
 
     // ambient light which is for the whole scene
-    this.ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     //this.ambientLight.castShadow = true;
     this.scene.add(this.ambientLight);
 
     // directional light - parallel sun rays
-    this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8 * Math.PI,);
+    this.directionalLight.position.set(-3, 10, -10);
+    // this.directionalLight.castShadow = true;
+    // this.directionalLight.shadow.camera.top = 2;
+    // this.directionalLight.shadow.camera.bottom = -2;
+    // this.directionalLight.shadow.camera.left = -2;
+    // this.directionalLight.shadow.camera.right = 2;
+    // this.directionalLight.shadow.camera.near = 0.1;
+    // this.directionalLight.shadow.camera.far = 40;
     //this.directionalLight.castShadow = true;
-    this.directionalLight.position.set(30, 30, 64);
+    //this.directionalLight.position.set(0, 30, 30);
     this.scene.add(this.directionalLight);
+
+    //second lighting
+    this.directionalLight2 = new THREE.DirectionalLight(0xffbb00, 0.1);
+    this.directionalLight2.position.set(0, 30, 10);
+    //this.directionalLight2.castShadow = true;
+    // this.directionalLight2.shadow.camera.top = 2;
+    // this.directionalLight2.shadow.camera.bottom = -2;
+    // this.directionalLight2.shadow.camera.left = -2;
+    // this.directionalLight2.shadow.camera.right = 2;
+    // this.directionalLight2.shadow.camera.near = 0.1;
+    // this.directionalLight2.shadow.camera.far = 40;
+    //this.directionalLight2.castShadow = true;
+    //this.directionalLight2.position.set(0, 30, 30);
+    this.scene.add(this.directionalLight2);
 
     // if window resizes
     window.addEventListener('resize', () => this.onWindowResize(), true);
@@ -103,12 +140,12 @@ export default class SceneInit {
     //this.scene.background = this.loader.load('./pics/space.jpeg');
     //this.scene.background = new THREE.Color(0xffffff);
     //this.scene.fog = new THREE.Fog( 0xa0a0a0, 10, 500 );
-    // NOTE: Declare uniforms to pass into glsl shaders.
-    // this.uniforms = {
-    //   u_time: { type: 'f', value: 1.0 },
-    //   colorB: { type: 'vec3', value: new THREE.Color(0xfff000) },
-    //   colorA: { type: 'vec3', value: new THREE.Color(0xffffff) },
-    // };
+    //NOTE: Declare uniforms to pass into glsl shaders.
+    this.uniforms = {
+      u_time: { type: 'f', value: 1.0 },
+      colorB: { type: 'vec3', value: new THREE.Color(0xfff000) },
+      colorA: { type: 'vec3', value: new THREE.Color(0xffffff) },
+    };
   }
 
   animate() {

@@ -61,29 +61,81 @@ function App() {
     // const boxMaterial = new THREE.MeshNormalMaterial();
     // const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
     // test.scene.add(boxMesh);
+    
+    const loadingManager = new THREE.LoadingManager();
+    loadingManager.onStart = function(url, item, total) {
+      console.log(`Started loading: ${url}`);
+    }
+    let loadedModel, loadedModel2;
 
-    let loadedModel;
-
-    const glftLoader = new GLTFLoader();
-    //glftLoader.load('./ShidharthaWork/Helmet_Red_output_1.gltf', (gltfScene) => {
-    glftLoader.load('./assets/scene.glb', (gltfScene) => {
+    const glftLoader = new GLTFLoader(loadingManager);
+    glftLoader.load('./assets/gcWork/helmetAndBox.gltf', (gltfScene) => {
       loadedModel = gltfScene;
       console.log(loadedModel);
 
-      loadedModel.scene.background = new THREE.Color(0xff0000); //background color
-      // var axisHelper = new THREE.AxisHelper(100);
-      // gltfScene.scene.add(axisHelper);
-
-      // gltfScene.scene.rotation.y = 0;
-
       gltfScene.scene.position.z = 0;
       gltfScene.scene.position.x = 0;
-      //gltfScene.scene.rotateOnAxis = true;
-      gltfScene.scene.position.y = -30;
-      gltfScene.scene.scale.set(0.25, 0.25, 0.25);
+      gltfScene.scene.position.y = -25;
+      gltfScene.scene.scale.set(0.15, 0.15, 0.15);
 
       test.scene.add(gltfScene.scene);
     });
+
+    // const glftLoader2 = new GLTFLoader();
+    // glftLoader2.load('./assets/BoxGlass_Output.gltf', (gltfScene2) => {
+    //   loadedModel2 = gltfScene2;
+    //   console.log(loadedModel2);
+
+    //   gltfScene2.scene.position.z = 0;
+    //   gltfScene2.scene.position.x = 0;
+    //   gltfScene2.scene.position.y = -30;
+    //   gltfScene2.scene.scale.set(0.25, 0.25, 0.25);
+
+    //   test.scene.add(gltfScene2.scene);
+    // });
+
+    function update() {
+      // Get time since last frame
+      var now = Date.now();
+      var dT = now - then;
+
+      if (isUserInteracting) {
+        // Get distance travelled since last frame
+        var dLon = lon - prevLon;
+        var dLat = lat - prevLat;
+        // velocity = distance / time
+        lonVelocity = dLon / dT;
+        latVelocity = dLat / dT;
+      } else {
+        // old position + ( velocity * time ) = new position
+        lon += lonVelocity * dT;
+        lat += latVelocity * dT;
+        lonVelocity *= 1 - dampingFactor;
+        latVelocity *= 1 - dampingFactor;
+      }
+
+      // Save these for next frame
+      then = now;
+      prevLon = lon;
+      prevLat = lat;
+
+      lat = Math.max(-85, Math.min(85, lat));
+
+      phi = THREE.Math.degToRad(90 - lat);
+      theta = THREE.Math.degToRad(lon);
+
+      target.x = 500 * Math.sin(phi) * Math.cos(theta);
+      target.y = 500 * Math.cos(phi);
+      target.z = 500 * Math.sin(phi) * Math.sin(theta);
+
+      camera.lookAt(target);
+
+      //Step 3: recalculate delta based on dampingFactor
+      lonDelta *= 1 - dampingFactor;
+      latDelta *= 1 - dampingFactor;
+
+      renderer.render(scene, camera);
+    }
 
     const animate = () => {
       if (loadedModel) {
@@ -97,49 +149,6 @@ function App() {
     };
     animate();
   }, []);
-
-  function update() {
-    // Get time since last frame
-    var now = Date.now();
-    var dT = now - then;
-
-    if (isUserInteracting) {
-      // Get distance travelled since last frame
-      var dLon = lon - prevLon;
-      var dLat = lat - prevLat;
-      // velocity = distance / time
-      lonVelocity = dLon / dT;
-      latVelocity = dLat / dT;
-    } else {
-      // old position + ( velocity * time ) = new position
-      lon += lonVelocity * dT;
-      lat += latVelocity * dT;
-      lonVelocity *= 1 - dampingFactor;
-      latVelocity *= 1 - dampingFactor;
-    }
-
-    // Save these for next frame
-    then = now;
-    prevLon = lon;
-    prevLat = lat;
-
-    lat = Math.max(-85, Math.min(85, lat));
-
-    phi = THREE.Math.degToRad(90 - lat);
-    theta = THREE.Math.degToRad(lon);
-
-    target.x = 500 * Math.sin(phi) * Math.cos(theta);
-    target.y = 500 * Math.cos(phi);
-    target.z = 500 * Math.sin(phi) * Math.sin(theta);
-
-    camera.lookAt(target);
-
-    //Step 3: recalculate delta based on dampingFactor
-    lonDelta *= 1 - dampingFactor;
-    latDelta *= 1 - dampingFactor;
-
-    renderer.render(scene, camera);
-  }
 
   return (
     <div>
