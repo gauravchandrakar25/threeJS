@@ -69,7 +69,7 @@ function App() {
     let loadedModel, loadedModel2;
 
     const glftLoader = new GLTFLoader(loadingManager);
-    glftLoader.load('./assets/gcWork/Helmet_with_Box.gltf', (gltfScene) => {
+    glftLoader.load('./assets/gcWork/tintedGlass.gltf', (gltfScene) => {
       loadedModel = gltfScene;
       console.log(loadedModel);
 
