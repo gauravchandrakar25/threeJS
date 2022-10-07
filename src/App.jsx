@@ -80,7 +80,7 @@ function App() {
       gltfScene.scene.position.z = 0;
       gltfScene.scene.position.x = 0;
       gltfScene.scene.position.y = -25;
-      gltfScene.scene.scale.set(0.15, 0.15, 0.15);
+      gltfScene.scene.scale.set(0.1, 0.1, 0.1);
 
       test.scene.add(gltfScene.scene);
     });
