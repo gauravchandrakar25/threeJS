@@ -61,17 +61,21 @@ function App() {
     // const boxMaterial = new THREE.MeshNormalMaterial();
     // const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
     // test.scene.add(boxMesh);
-    
+
     const loadingManager = new THREE.LoadingManager();
-    loadingManager.onStart = function(url, item, total) {
+    loadingManager.onStart = function (url, item, total) {
       console.log(`Started loading: ${url}`);
-    }
+    };
     let loadedModel, loadedModel2;
 
     const glftLoader = new GLTFLoader(loadingManager);
-    glftLoader.load('./assets/gcWork/helmetAndBox.gltf', (gltfScene) => {
+    glftLoader.load('./assets/gcWork/Helmet_with_Box.gltf', (gltfScene) => {
       loadedModel = gltfScene;
       console.log(loadedModel);
+
+      gltfScene.scene.traverse((child) => {
+        if (child.material) child.material.metalness = 0.2;
+      });
 
       gltfScene.scene.position.z = 0;
       gltfScene.scene.position.x = 0;
